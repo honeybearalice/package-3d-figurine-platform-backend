@@ -1,0 +1,391 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  username    String   @unique
+  email       String   @unique
+  password    String
+  phone       String?
+  avatar      String?
+  level       String   @default("regular") // regular, vip, premium
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  preferences UserPreferences?
+  generatedImages GeneratedImage[]
+  orders      Order[]
+  showcaseItems ShowcaseItem[]
+  comments    Comment[]
+  cartItems   CartItem[]
+  notifications Notification[]
+  chatSessions LiveChatSession[]
+  
+  @@map("users")
+}
+
+model UserPreferences {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  defaultStyle    String   @default("realistic") // realistic, anime, cyberpunk, classic
+  preferredSize   String   @default("20cm") // 15cm, 20cm, 30cm
+  favoriteAccessories String[]
+  notifications   Json     // {email: boolean, sms: boolean, push: boolean}
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_preferences")
+}
+
+model GeneratedImage {
+  id              String   @id @default(cuid())
+  userId          String
+  originalImage   String
+  generatedImage  String
+  style           String
+  profession      String?
+  prompt          String
+  modelUsed       String
+  quality         String   @default("medium") // low, medium, high
+  isPublic        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  downloadCount   Int      @default(0)
+  likes           Int      @default(0)
+  
+  // Relations
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  showcaseItem   ShowcaseItem?
+  cartItems      CartItem[]
+  
+  @@map("generated_images")
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  description     String
+  basePrice       Float
+  images          String[] // JSON array of image URLs
+  category        String   // figurine, accessory, model
+  isCustomizable  Boolean  @default(true)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  specifications ProductSpecs?
+  accessories    ProductAccessory[]
+  cartItems      CartItem[]
+  
+  @@map("products")
+}
+
+model ProductSpecs {
+  id          String   @id @default(cuid())
+  productId   String   @unique
+  material    String   // PLA, ABS, Resin, Metal, Wood
+  weight      Float
+  dimensions  Json     // {width, height, depth}
+  colors      String[] // Available colors
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sizes   ProductSize[]
+  
+  @@map("product_specs")
+}
+
+model ProductSize {
+  id            String   @id @default(cuid())
+  specsId       String
+  name          String
+  dimensions    String   // e.g., "15cm"
+  price         Float
+  isPopular     Boolean  @default(false)
+  
+  // Relations
+  specs     ProductSpecs @relation(fields: [specsId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+  
+  @@map("product_sizes")
+}
+
+model Accessory {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  image       String
+  category    String   // headwear, clothing, props, base, decoration, tech
+  maxQuantity Int      @default(1)
+  is3DPreviewAvailable Boolean @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  productAccessories ProductAccessory[]
+  cartItemAccessories CartItemAccessory[]
+  
+  @@map("accessories")
+}
+
+model ProductAccessory {
+  id          String   @id @default(cuid())
+  productId   String
+  accessoryId String
+  
+  // Relations
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  accessory Accessory @relation(fields: [accessoryId], references: [id], onDelete: Cascade)
+  
+  @@unique([productId, accessoryId])
+  @@map("product_accessories")
+}
+
+model CartItem {
+  id            String   @id @default(cuid())
+  userId        String
+  productId     String
+  imageId       String?
+  orderId       String?
+  quantity      Int      @default(1)
+  unitPrice     Float
+  totalPrice    Float
+  customizations Json    // Custom text, colors, emblems
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product            Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  image              GeneratedImage?    @relation(fields: [imageId], references: [id])
+  selectedSize       ProductSize        @relation(fields: [selectedSizeId], references: [id])
+  selectedSizeId     String
+  order              Order?             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  selectedAccessories CartItemAccessory[]
+  
+  @@map("cart_items")
+}
+
+model CartItemAccessory {
+  id           String   @id @default(cuid())
+  cartItemId   String
+  accessoryId  String
+  quantity     Int      @default(1)
+  position     String?  // For positioning accessories
+  
+  // Relations
+  cartItem   CartItem   @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+  accessory  Accessory  @relation(fields: [accessoryId], references: [id], onDelete: Cascade)
+  
+  @@unique([cartItemId, accessoryId])
+  @@map("cart_item_accessories")
+}
+
+model Order {
+  id                    String   @id @default(cuid())
+  userId                String
+  status                String   @default("pending") // pending, confirmed, design_approved, in_production, quality_check, packaging, shipped, delivered, cancelled
+  totalAmount           Float
+  estimatedCompletionDate DateTime
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Relations
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        CartItem[]
+  shippingInfo ShippingInfo?
+  paymentInfo  PaymentInfo?
+  trackingInfo TrackingInfo?
+  timeline     OrderTimeline[]
+  
+  @@map("orders")
+}
+
+model OrderTimeline {
+  id        String   @id @default(cuid())
+  orderId   String
+  status    String
+  title     String
+  description String?
+  completed Boolean  @default(false)
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@map("order_timeline")
+}
+
+model ShippingInfo {
+  id             String   @id @default(cuid())
+  orderId        String   @unique
+  recipient      String
+  phone          String
+  address        String
+  city           String
+  state          String
+  country        String
+  postalCode     String
+  shippingMethod String   // standard, express, international
+  cost           Float
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@map("shipping_info")
+}
+
+model PaymentInfo {
+  id           String   @id @default(cuid())
+  orderId      String   @unique
+  method       String   // wechat, alipay, stripe, paypal, credit_card, bank_transfer
+  status       String   @default("pending") // pending, processing, completed, failed, refunded
+  transactionId String?
+  amount       Float
+  currency     String   @default("USD")
+  paidAt       DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@map("payment_info")
+}
+
+model TrackingInfo {
+  id               String   @id @default(cuid())
+  orderId          String   @unique
+  carrier          String
+  trackingNumber   String
+  trackingUrl      String
+  estimatedDelivery DateTime
+  currentLocation  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@map("tracking_info")
+}
+
+model ShowcaseItem {
+  id              String   @id @default(cuid())
+  userId          String
+  imageId         String   @unique
+  title           String
+  description     String
+  tags            String[]
+  isPublic        Boolean  @default(false)
+  featured        Boolean  @default(false)
+  viewCount       Int      @default(0)
+  likeCount       Int      @default(0)
+  commentCount    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image   GeneratedImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  comments Comment[]
+  likes   ShowcaseLike[]
+  
+  @@map("showcase_items")
+}
+
+model ShowcaseLike {
+  id             String   @id @default(cuid())
+  showcaseItemId String
+  userId         String
+  
+  // Relations
+  showcaseItem ShowcaseItem @relation(fields: [showcaseItemId], references: [id], onDelete: Cascade)
+  
+  @@unique([showcaseItemId, userId])
+  @@map("showcase_likes")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  itemId    String
+  content   String
+  parentId  String?
+  likeCount Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  showcaseItem ShowcaseItem?  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  
+  @@map("comments")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // order_status, payment, promotion, system, social
+  title     String
+  content   String
+  data      Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notifications")
+}
+
+model LiveChatSession {
+  id        String   @id @default(cuid())
+  userId    String?
+  agentId   String?
+  status    String   @default("waiting") // waiting, active, ended
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+  
+  // Relations
+  user     User?           @relation(fields: [userId], references: [id])
+  messages LiveChatMessage[]
+  
+  @@map("live_chat_sessions")
+}
+
+model LiveChatMessage {
+  id        String   @id @default(cuid())
+  sessionId String
+  userId    String?
+  agentId   String?
+  content   String
+  type      String   @default("text") // text, image, file
+  isFromUser Boolean @default(true)
+  timestamp DateTime @default(now())
+  
+  // Relations
+  session LiveChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@map("live_chat_messages")
+}
