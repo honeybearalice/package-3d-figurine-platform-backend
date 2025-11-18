@@ -20,7 +20,7 @@ export const verifyPassword = async (password: string, hashedPassword: string): 
 export const generateToken = (payload: any, expiresIn?: string): string => {
   return jwt.sign(
     payload, 
-    config.jwt.secret, 
+    config.jwt.secret as string, 
     { expiresIn: expiresIn || config.jwt.expiresIn }
   );
 };
@@ -28,7 +28,7 @@ export const generateToken = (payload: any, expiresIn?: string): string => {
 // 验证 JWT token
 export const verifyToken = (token: string): any => {
   try {
-    return jwt.verify(token, config.jwt.secret);
+    return jwt.verify(token, config.jwt.secret as string);
   } catch (error) {
     throw new Error('Invalid token');
   }
@@ -38,7 +38,7 @@ export const verifyToken = (token: string): any => {
 export const generateRefreshToken = (payload: any): string => {
   return jwt.sign(
     payload, 
-    config.jwt.secret, 
+    config.jwt.secret as string, 
     { expiresIn: config.jwt.refreshExpiresIn }
   );
 };
@@ -297,7 +297,7 @@ export const isValidFileSize = (size: number, maxSize: number): boolean => {
 };
 
 // 清理对象，移除undefined和null值
-export const cleanObject = <T>(obj: T): Partial<T> => {
+export const cleanObject = <T extends Record<string, any>>(obj: T): Partial<T> => {
   const cleaned = {} as Partial<T>;
   Object.entries(obj).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {

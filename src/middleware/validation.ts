@@ -288,26 +288,22 @@ export const ValidationSchemas = {
   })
 };
 
-// 快速验证装饰器
+// 快速验证中间件
 export const validateRequest = (schemaName: keyof typeof ValidationSchemas, property: 'body' | 'query' | 'params' = 'body') => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value;
+  return (req: Request, res: Response, next: NextFunction) => {
+    const schema = (ValidationSchemas as any)[schemaName];
+    const actualSchema = typeof schema === 'object' && property in schema ? (schema as any)[property] : schema;
     
-    descriptor.value = async function(req: Request, res: Response, next: NextFunction) {
-      const schema = (ValidationSchemas as any)[schemaName];
-      const actualSchema = typeof schema === 'object' && property in schema ? (schema as any)[property] : schema;
-      
-      if (!actualSchema) {
-        return res.status(500).json({
-          success: false,
-          error: {
-            code: 'SCHEMA_NOT_FOUND',
-            message: '验证模式未找到'
-          }
-        });
-      }
+    if (!actualSchema) {
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'SCHEMA_NOT_FOUND',
+          message: '验证模式未找到'
+        }
+      });
+    }
 
-      return validate(actualSchema, property)(req, res, next);
-    };
+    return validate(actualSchema, property)(req, res, next);
   };
 };

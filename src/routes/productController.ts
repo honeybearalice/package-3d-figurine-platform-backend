@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { ProductService } from '../services/database';
 import { asyncHandler } from '../middleware/error';
 import { validateRequest } from '../middleware/validation';
@@ -12,7 +12,7 @@ const router = Router();
 
 // 获取商品列表
 export const getProducts = [
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { page = 1, limit = 20, category, search, isActive, sortBy, sortOrder } = req.query;
 
     const result = await ProductService.getProducts({
@@ -40,7 +40,7 @@ export const getProducts = [
 
 // 获取商品详情
 export const getProduct = [
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const product = await ProductService.getProductById(id);
@@ -67,7 +67,7 @@ export const createProduct = [
   authenticateToken,
   requireRole(['admin', 'superadmin']),
   validateRequest('product', 'create'),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const productData = req.body;
 
     const product = await ProductService.createProduct(productData);
@@ -75,7 +75,7 @@ export const createProduct = [
     logger.info('Product created by admin', { 
       productId: product.id, 
       name: product.name,
-      adminId: req.user.id 
+      adminId: (req as any).user.id 
     });
 
     res.status(201).json({
@@ -90,7 +90,7 @@ export const updateProduct = [
   authenticateToken,
   requireRole(['admin', 'superadmin']),
   validateRequest('product', 'update'),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const updateData = req.body;
 
@@ -108,7 +108,7 @@ export const updateProduct = [
 
     logger.info('Product updated by admin', { 
       productId: id, 
-      adminId: req.user.id 
+      adminId: (req as any).user.id 
     });
 
     res.json({
@@ -122,7 +122,7 @@ export const updateProduct = [
 export const deleteProduct = [
   authenticateToken,
   requireRole(['admin', 'superadmin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const product = await ProductService.deleteProduct(id);
@@ -139,7 +139,7 @@ export const deleteProduct = [
 
     logger.info('Product deleted by admin', { 
       productId: id, 
-      adminId: req.user.id 
+      adminId: (req as any).user.id 
     });
 
     res.json({
@@ -153,7 +153,7 @@ export const deleteProduct = [
 
 // 搜索商品
 export const searchProducts = [
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { q, page = 1, limit = 20, category } = req.query;
 
     if (!q || (q as string).trim().length === 0) {
@@ -190,7 +190,7 @@ export const searchProducts = [
 
 // 获取商品分类
 export const getCategories = [
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     // 模拟分类数据，实际应该从数据库动态获取
     const categories = [
       {
@@ -225,7 +225,7 @@ export const getCategories = [
 
 // 获取热门商品
 export const getPopularProducts = [
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { limit = 10 } = req.query;
 
     const result = await ProductService.getProducts({
@@ -256,15 +256,7 @@ export const productController = {
   deleteProduct,
   searchProducts,
   getCategories,
-  getPopularProducts,
-  
-  // 验证中间件
-  validateCreate: validateRequest('product', 'create'),
-  validateUpdate: validateRequest('product', 'update'),
-  
-  // 权限中间件
-  requireAuth: authenticateToken,
-  requireAdmin: requireRole(['admin', 'superadmin'])
+  getPopularProducts
 };
 
 // 导出路由器

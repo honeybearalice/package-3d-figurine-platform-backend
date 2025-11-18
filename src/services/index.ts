@@ -51,7 +51,7 @@ export class S3Service {
         key: result.Key,
         etag: result.ETag
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`S3 upload failed: ${error.message}`);
     }
   }
@@ -66,7 +66,7 @@ export class S3Service {
       await this.s3.deleteObject(params).promise();
       
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`S3 delete failed: ${error.message}`);
     }
   }
@@ -177,7 +177,7 @@ export class FileService {
       }, 3600); // 1小时缓存
       
       return result;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Image upload failed: ${error.message}`);
     }
   }
@@ -190,7 +190,7 @@ export class FileService {
       await this.cacheService.delete(`file:${key}`);
       
       return result;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Image delete failed: ${error.message}`);
     }
   }
@@ -294,7 +294,7 @@ export class HealthCheckService {
     try {
       await UserService.getUsers({ page: 1, limit: 1 });
       return { status: 'healthy', message: 'Database connection OK' };
-    } catch (error) {
+    } catch (error: any) {
       return { status: 'unhealthy', message: `Database error: ${error.message}` };
     }
   }
@@ -309,7 +309,7 @@ export class HealthCheckService {
       return result === 'test' 
         ? { status: 'healthy', message: 'Redis connection OK' }
         : { status: 'unhealthy', message: 'Redis data consistency error' };
-    } catch (error) {
+    } catch (error: any) {
       return { status: 'unhealthy', message: `Redis error: ${error.message}` };
     }
   }
@@ -319,13 +319,13 @@ export class HealthCheckService {
     try {
       // 简单的S3连接测试
       return { status: 'healthy', message: 'S3 connection OK' };
-    } catch (error) {
+    } catch (error: any) {
       return { status: 'unhealthy', message: `S3 error: ${error.message}` };
     }
   }
 
   async checkExternalServices() {
-    const results = {};
+    const results: any = {};
     
     // 检查豆包AI
     try {
@@ -334,7 +334,7 @@ export class HealthCheckService {
       results.doubao = isHealthy 
         ? { status: 'healthy', message: 'Doubao API OK' }
         : { status: 'unhealthy', message: 'Doubao API unreachable' };
-    } catch (error) {
+    } catch (error: any) {
       results.doubao = { status: 'unhealthy', message: `Doubao error: ${error.message}` };
     }
     
@@ -347,7 +347,7 @@ export class HealthCheckService {
         message: 'Payment services OK',
         details: status
       };
-    } catch (error) {
+    } catch (error: any) {
       results.payment = { status: 'unhealthy', message: `Payment error: ${error.message}` };
     }
     
@@ -362,7 +362,7 @@ export class HealthCheckService {
       this.checkExternalServices()
     ]);
 
-    const results = {
+    const results: any = {
       timestamp: new Date(),
       services: {},
       overall: 'healthy'

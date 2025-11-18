@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { ImageService } from '../services/database';
 import { asyncHandler } from '../middleware/error';
 import { validateRequest } from '../middleware/validation';
@@ -12,7 +12,7 @@ const router = Router();
 
 // 获取展示池项目
 export const getShowcaseItems = [
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { 
       page = 1, 
       limit = 20, 
