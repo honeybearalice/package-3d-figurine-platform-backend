@@ -116,7 +116,7 @@ export const getShowcaseItems = [
 
 // 获取单个展示项目
 export const getShowcaseItem = [
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
     // 模拟数据
@@ -182,7 +182,7 @@ export const getShowcaseItem = [
 export const createShowcaseItem = [
   authenticateToken,
   validateRequest('showcase', 'create'),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { imageId, title, description, tags, isPublic } = req.body;
 
     // 验证图像是否属于当前用户
@@ -236,7 +236,7 @@ export const createShowcaseItem = [
 export const updateShowcaseItem = [
   authenticateToken,
   validateRequest('showcase', 'update'),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const { title, description, tags, isPublic, featured } = req.body;
 
@@ -268,7 +268,7 @@ export const updateShowcaseItem = [
 // 删除展示项目
 export const deleteShowcaseItem = [
   authenticateToken,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
     // 模拟检查权限
@@ -291,7 +291,7 @@ export const deleteShowcaseItem = [
 // 点赞展示项目
 export const likeShowcaseItem = [
   authenticateToken,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
     // 模拟检查是否已经点赞
@@ -329,7 +329,7 @@ export const likeShowcaseItem = [
 export const addComment = [
   authenticateToken,
   validateRequest('comment', 'create'),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const { content, parentId } = req.body;
 
@@ -363,7 +363,7 @@ export const addComment = [
 
 // 获取评论
 export const getComments = [
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const { page = 1, limit = 20 } = req.query;
 
@@ -412,7 +412,7 @@ export const getComments = [
 // 删除评论
 export const deleteComment = [
   authenticateToken,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id, commentId } = req.params;
 
     // 模拟检查权限（只能删除自己的评论或管理员）
@@ -445,7 +445,7 @@ export const deleteComment = [
 
 // 获取热门展示项目
 export const getPopularShowcase = [
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { period = 'week', limit = 10 } = req.query;
 
     // 模拟热门数据
@@ -484,7 +484,7 @@ export const getPopularShowcase = [
 // 获取推荐展示项目
 export const getRecommendedShowcase = [
   authenticateToken,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { limit = 10, style, profession } = req.query;
 
     // 基于用户偏好推荐

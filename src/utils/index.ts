@@ -18,11 +18,9 @@ export const verifyPassword = async (password: string, hashedPassword: string): 
 
 // 生成 JWT token
 export const generateToken = (payload: any, expiresIn?: string): string => {
-  return jwt.sign(
-    payload, 
-    config.jwt.secret as string, 
-    { expiresIn: expiresIn || config.jwt.expiresIn }
-  );
+  const secret = config.jwt.secret as string;
+  const tokenExpiresIn = expiresIn || config.jwt.expiresIn;
+  return jwt.sign(payload, secret, { expiresIn: tokenExpiresIn as any });
 };
 
 // 验证 JWT token
@@ -36,11 +34,9 @@ export const verifyToken = (token: string): any => {
 
 // 生成刷新 token
 export const generateRefreshToken = (payload: any): string => {
-  return jwt.sign(
-    payload, 
-    config.jwt.secret as string, 
-    { expiresIn: config.jwt.refreshExpiresIn }
-  );
+  const secret = config.jwt.secret as string;
+  const refreshExpiresIn = config.jwt.refreshExpiresIn;
+  return jwt.sign(payload, secret, { expiresIn: refreshExpiresIn as any });
 };
 
 // 生成随机字符串

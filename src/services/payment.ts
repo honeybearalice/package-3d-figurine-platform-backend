@@ -21,11 +21,12 @@ export class StripePaymentGateway implements PaymentGateway {
   constructor() {
     if (config.payment.stripe.secretKey) {
       this.stripe = new Stripe(config.payment.stripe.secretKey, {
-        apiVersion: '2024-06-20',
+        apiVersion: '2023-10-16',
       });
       logger.info('Stripe payment gateway initialized');
     } else {
       logger.warn('Stripe payment gateway not configured');
+      this.stripe = null as any;
     }
   }
 

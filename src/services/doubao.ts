@@ -68,7 +68,7 @@ export class DoubaoAIService {
           originalImage: originalImageUrl,
           generatedImage: response.data.data[0].url,
           style: request.style,
-          profession: request.profession,
+          profession: request.profession || null,
           prompt: prompt,
           modelUsed: this.model,
           quality: request.quality,
@@ -164,9 +164,7 @@ export class DoubaoAIService {
         success: true,
         data: results,
         meta: {
-          total: requests.length,
-          successful: results.length,
-          failed: errors.length
+          total: requests.length
         },
         error: errors.length > 0 ? {
           code: 'BATCH_GENERATION_PARTIAL_ERROR',
