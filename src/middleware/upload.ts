@@ -16,12 +16,23 @@ import { config } from '../config';
 import { logger } from '../utils/logger';
 import { generateFileName, isImageFile } from '../utils';
 
+
+
+
 // AWS S3 配置
-const s3 = new AWS.S3({
+const s3Config: AWS.S3.ClientConfiguration = {
   accessKeyId: config.aws.accessKeyId,
   secretAccessKey: config.aws.secretAccessKey,
   region: config.aws.region
-});
+};
+
+// 中国区域需要特殊处理
+if (config.aws.region === 'cn-north-1' || config.aws.region?.startsWith('cn-')) {
+  s3Config.endpoint = config.aws.endpoint || `https://s3.${config.aws.region}.amazonaws.com.cn`;
+  s3Config.s3ForcePathStyle = true; // 中国区域需要强制路径风格
+}
+
+const s3 = new AWS.S3(s3Config);
 
 // 基础存储配置
 const storage = multer.memoryStorage();

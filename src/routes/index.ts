@@ -10,6 +10,7 @@ import { paymentController } from './paymentController';
 import { showcaseController } from './showcaseController';
 import { adminController } from './adminController';
 import { notificationController } from './notificationController';
+import { healthCheck, readinessCheck } from '../controllers/healthController';
 import { validateQuery, ValidationSchemas } from '../middleware/validation';
 import { authenticateToken } from '../middleware/auth';
 
@@ -17,17 +18,8 @@ import { authenticateToken } from '../middleware/auth';
 const router = Router();
 
 // 健康检查路由
-router.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    data: {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      version: '1.0.0',
-      environment: process.env.NODE_ENV || 'development'
-    }
-  });
-});
+router.get('/health', healthCheck);
+router.get('/ready', readinessCheck);
 
 // 用户认证路由
 router.post('/auth/register', userController.register);

@@ -1,0 +1,59 @@
+services:
+  - type: web
+    name: package-3d-figurine-platform-backend
+    env: node
+    buildCommand: npm ci && npm run db:generate && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgresql://postgres:27t79KCbPy5yUKQM@db.onobzpqfsxjiqboudczj.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1&sslmode=require
+      - key: DIRECT_URL
+        value: postgresql://postgres:27t79KCbPy5yUKQM@db.onobzpqfsxjiqboudczj.supabase.co:5432/postgres?sslmode=require
+      - key: JWT_SECRET
+        value: my_secret_3d_fig_token_@2025
+      - key: DOUBAO_API_KEY
+        value: 6220372b-0e26-4435-b06c-3e38f2902f63
+      - key: DOUBAO_API_URL
+        value: https://ark.cn-beijing.volces.com/api/v3/images/generations
+      - key: DOUBAO_MODEL
+        value: ep-20250917182847-vj4mj
+      - key: AWS_ACCESS_KEY_ID
+        value: your_aws_access_key_id
+      - key: AWS_SECRET_ACCESS_KEY
+        value: your_aws_secret_access_key
+      - key: AWS_REGION
+        value: cn-north-1
+      - key: AWS_ENDPOINT
+        value: https://s3.cn-north-1.amazonaws.com.cn
+      - key: S3_BUCKET_NAME
+        value: molefun-s3-assets
+      - key: STRIPE_SECRET_KEY
+        value: sk_test_your_stripe_secret_key
+      - key: STRIPE_WEBHOOK_SECRET
+        value: whsec_your_stripe_webhook_secret
+      - key: PAYPAL_CLIENT_ID
+        value: your_paypal_client_id
+      - key: PAYPAL_CLIENT_SECRET
+        value: your_paypal_client_secret
+      - key: PAYPAL_MODE
+        value: sandbox
+      - key: SENDGRID_API_KEY
+        value: your_sendgrid_api_key
+      - key: FROM_EMAIL
+        value: noreply@moletech.fun
+      - key: FROM_NAME
+        value: MoleTech 3D Figurine Platform
+      - key: TWILIO_ACCOUNT_SID
+        value: your_twilio_account_sid
+      - key: TWILIO_AUTH_TOKEN
+        value: your_twilio_auth_token
+      - key: TWILIO_PHONE_NUMBER
+        value: +1234567890
+      - key: API_URL
+        value: https://api.moletech.fun
+      - key: FRONTEND_URL
+        value: https://www.moletech.fun
+      - key: PORT
+        value: 3001

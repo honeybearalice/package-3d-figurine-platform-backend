@@ -14,6 +14,14 @@ export const config = {
   // 数据库配置
   database: {
     url: process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/moletech_figurine_db',
+    directUrl: process.env.DIRECT_URL || process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/moletech_figurine_db',
+  },
+  databaseConfig: {
+    connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
+    acquireTimeoutMillis: parseInt(process.env.DB_ACQUIRE_TIMEOUT || '60000'),
+    idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'),
+    reapIntervalMillis: parseInt(process.env.DB_REAP_INTERVAL || '1000'),
+    createRetryIntervalMillis: parseInt(process.env.DB_CREATE_RETRY_INTERVAL || '200'),
   },
 
   // JWT 配置
@@ -29,6 +37,7 @@ export const config = {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: process.env.AWS_REGION || 'us-west-2',
     bucketName: process.env.S3_BUCKET_NAME || 'moletech-figurine-uploads',
+    endpoint: process.env.AWS_ENDPOINT, // For China region support
   },
 
   // 豆包 API 配置
